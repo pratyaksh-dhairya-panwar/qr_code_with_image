@@ -1,25 +1,15 @@
+# api/app.py
+
 import os
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request
 import qrcode
 from PIL import Image, ImageDraw, ImageOps
-from werkzeug.utils import secure_filename
+from io import BytesIO
+import base64
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
 
-# Configuration
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # Max 5MB upload size
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-# Ensure the upload folder exists
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
-def allowed_file(filename):
-    """Check if the file has an allowed extension."""
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def generate_qr(url, image_path=None, fill_color="black", back_color="white", grayscale=False):
+def generate_qr(url, image_file=None, fill_color="black", back_color="white", grayscale=False):
     """Generate a QR code with an optional central image."""
     # Create QR code with high error correction
     qr = qrcode.QRCode(
@@ -31,14 +21,13 @@ def generate_qr(url, image_path=None, fill_color="black", back_color="white", gr
     # Generate QR code image with specified colors
     qr_img = qr.make_image(fill_color=fill_color, back_color=back_color).convert('RGBA')
 
-    if image_path:
+    if image_file:
         # Open the uploaded image and convert to RGBA
-        logo = Image.open(image_path).convert('RGBA')
+        logo = Image.open(image_file).convert('RGBA')
 
         if grayscale:
             # Convert logo to grayscale
-            logo = ImageOps.grayscale(logo)
-            logo = logo.convert('RGBA')  # Convert back to RGBA
+            logo = logo.convert('L').convert('RGBA')
 
         # Calculate the size of the logo area
         qr_width, qr_height = qr_img.size
@@ -110,35 +99,30 @@ def index():
             back_color = 'white'
             grayscale = True
         else:
-            fill_color = request.form.get('fill_color', '#000000')
-            back_color = request.form.get('back_color', '#FFFFFF')
+            fill_color = request.form.get('fill_color') or '#000000'
+            back_color = request.form.get('back_color') or '#FFFFFF'
             grayscale = False
 
-        # Check if an image was uploaded
-        file = request.files.get('image')
-        image_path = None
-        if file and file.filename != '':
-            if allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                file.save(image_path)
-            else:
-                return render_template('index.html', error="Unsupported file type.")
+        # Process the uploaded image in memory
+        image_file = request.files.get('image')
+        if image_file and image_file.filename == '':
+            image_file = None
 
         # Generate the QR code
-        qr_img = generate_qr(url, image_path, fill_color, back_color, grayscale)
+        qr_img = generate_qr(url, image_file, fill_color, back_color, grayscale)
 
-        # Save the QR code image
-        qr_filename = "qr_code.png"
-        qr_path = os.path.join(app.config['UPLOAD_FOLDER'], qr_filename)
-        qr_img.save(qr_path)
+        # Save QR code image to a BytesIO object
+        img_io = BytesIO()
+        qr_img.save(img_io, 'PNG')
+        img_io.seek(0)
 
-        return render_template('result.html', qr_image=qr_filename)
+        # Encode the image to base64 to send to the template
+        img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
+
+        return render_template('index.html', qr_code=img_base64)
 
     return render_template('index.html')
 
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    """Serve the uploaded files."""
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+# Vercel requires the app object to be named 'app' in api files
+# No need to run app.run()
 

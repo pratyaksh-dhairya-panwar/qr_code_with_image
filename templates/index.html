@@ -43,7 +43,7 @@
         {% endif %}
         <form method="POST" enctype="multipart/form-data">
             <label for="url">Enter URL:</label>
-            <input type="search" id="url" name="url" placeholder="https://example.com" required>
+            <input type="url" id="url" name="url" placeholder="https://example.com" required>
 
             <label for="image">Upload Image (optional):</label>
             <input type="file" id="image" name="image" accept="image/*">
@@ -57,23 +57,33 @@
             <div id="color-options" style="display: none;">
                 <div class="color-option">
                     <label>Fill Color:</label>
-                    <div class="color-circle-container">
-                        <div class="color-circle" id="fill_color_circle"></div>
+                    <div class="color-picker">
                         <input type="color" id="fill_color" name="fill_color" value="#000000" oninput="updateFillColor()">
+                        <div class="color-circle" id="fill_color_circle"></div>
                     </div>
                 </div>
 
                 <div class="color-option">
                     <label>Background Color:</label>
-                    <div class="color-circle-container">
-                        <div class="color-circle" id="back_color_circle"></div>
+                    <div class="color-picker">
                         <input type="color" id="back_color" name="back_color" value="#FFFFFF" oninput="updateBackColor()">
+                        <div class="color-circle" id="back_color_circle"></div>
                     </div>
                 </div>
             </div>
 
             <button type="submit">Generate QR Code</button>
         </form>
+
+        {% if qr_code %}
+            <h2>Your Customized QR Code</h2>
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+
+            <div class="actions">
+                <a href="/">Generate Another QR Code</a>
+                <a href="data:image/png;base64,{{ qr_code }}" download="qr_code.png">Download QR Code</a>
+            </div>
+        {% endif %}
     </div>
 </body>
 </html>

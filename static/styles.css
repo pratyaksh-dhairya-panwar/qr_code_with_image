@@ -35,7 +35,7 @@ label {
     color: #555;
 }
 
-input[type="search"],
+input[type="url"],
 input[type="file"],
 input[type="color"] {
     padding: 10px;
@@ -118,52 +118,34 @@ img {
     margin-bottom: 0;
 }
 
-.color-circle {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 2px solid #ccc;
-    cursor: pointer;
-    margin-left: 10px;
-}
-
-.color-circle:hover {
-    border-color: #007bff;
-}
-
-/* Existing styles remain unchanged */
-
-.color-option {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.color-option label {
-    flex: 1;
-    margin-bottom: 0;
-}
-
-.color-circle-container {
+.color-picker {
     position: relative;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     margin-left: 10px;
 }
 
-.color-circle {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 2px solid #ccc;
-}
-
-.color-circle-container input[type="color"] {
+.color-picker input[type="color"] {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    opacity: 0;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: none;
     cursor: pointer;
+    opacity: 0;
+}
+
+.color-circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+}
+
+.color-circle:hover {
+    border-color: #007bff;
 }
