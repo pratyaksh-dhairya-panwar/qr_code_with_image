@@ -35,7 +35,7 @@ label {
     color: #555;
 }
 
-input[type="url"],
+input[type="search"],
 input[type="file"],
 input[type="color"] {
     padding: 10px;
