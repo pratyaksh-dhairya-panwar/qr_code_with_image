@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Custom QR Code Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function toggleColorOptions() {
+            var colorMode = document.querySelector('input[name="color_mode"]:checked').value;
+            var colorOptions = document.getElementById('color-options');
+            if (colorMode === 'color') {
+                colorOptions.style.display = 'block';
+            } else {
+                colorOptions.style.display = 'none';
+            }
+        }
+
+        function updateFillColor() {
+            var fillColorInput = document.getElementById('fill_color');
+            var fillColorCircle = document.getElementById('fill_color_circle');
+            fillColorCircle.style.backgroundColor = fillColorInput.value;
+        }
+
+        function updateBackColor() {
+            var backColorInput = document.getElementById('back_color');
+            var backColorCircle = document.getElementById('back_color_circle');
+            backColorCircle.style.backgroundColor = backColorInput.value;
+        }
+
+        // Initialize color circles on page load
+        window.onload = function() {
+            toggleColorOptions();
+            updateFillColor();
+            updateBackColor();
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Custom QR Code Generator</h1>
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+        <form method="POST" enctype="multipart/form-data">
+            <label for="url">Enter URL:</label>
+            <input type="search" id="url" name="url" placeholder="https://example.com" required>
+
+            <label for="image">Upload Image (optional):</label>
+            <input type="file" id="image" name="image" accept="image/*">
+
+            <label>QR Code Color Mode:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="color_mode" value="black_white" checked onclick="toggleColorOptions()"> Black and White</label>
+                <label><input type="radio" name="color_mode" value="color" onclick="toggleColorOptions()"> Color</label>
+            </div>
+
+            <div id="color-options" style="display: none;">
+                <div class="color-option">
+                    <label>Fill Color:</label>
+                    <div class="color-circle-container">
+                        <div class="color-circle" id="fill_color_circle"></div>
+                        <input type="color" id="fill_color" name="fill_color" value="#000000" oninput="updateFillColor()">
+                    </div>
+                </div>
+
+                <div class="color-option">
+                    <label>Background Color:</label>
+                    <div class="color-circle-container">
+                        <div class="color-circle" id="back_color_circle"></div>
+                        <input type="color" id="back_color" name="back_color" value="#FFFFFF" oninput="updateBackColor()">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit">Generate QR Code</button>
+        </form>
+    </div>
+</body>
+</html>
